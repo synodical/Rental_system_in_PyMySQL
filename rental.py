@@ -1,6 +1,6 @@
 import pymysql
 conn = pymysql.connect(host='localhost', user='root',
-                       password='2020121t', db='appliance_rental', charset='utf8mb4')
+                       password='', db='appliance_rental', charset='utf8mb4')
 cursor = conn.cursor()
 
 # 기존 테이블 삭제
