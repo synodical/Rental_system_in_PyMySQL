@@ -242,15 +242,29 @@ def select_model_all() :
                      type + ' ' + str(rentaldate) + "\n")
 
 def select_model_mno() :
+    w_file.write("3.5. 렌탈 예약 내역 조회 (모델번호)\n")
     line = r_file.readline()
     line = line.strip()
     column_values = line.split()
     input_mno = column_values[0]
-    w_file.write("3.5. 렌탈 예약 내역 조회 (모델번호)\n")
-    m_sql = "select customer.cname, customer.cid, bid, model.mno, model.type, model.rentaldate " + \
-            "from customer, model " + \
-            "where model.mno like '%" + input_mno + "%' " + \
-            "and customer.cid = model.cid"
+    if len(input_mno) == 1 or len(input_mno) == 4: # mno는 고정길이 4
+        m_sql = "select customer.cname, customer.cid, bid, model.mno, model.type, model.rentaldate " + \
+                "from customer, model " + \
+                "where model.mno like '%" + input_mno + "%' " + \
+                "and customer.cid = model.cid"
+    elif len(input_mno) == 2:
+        m_sql = "select customer.cname, customer.cid, bid, model.mno, model.type, model.rentaldate " + \
+                "from customer, model " + \
+                "where model.mno like '%" + input_mno[0] + "%" + \
+                "" + input_mno[1] + "%' " + \
+                "and customer.cid = model.cid"
+    elif len(input_mno) == 3:
+        m_sql = "select customer.cname, customer.cid, bid, model.mno, model.type, model.rentaldate " + \
+                "from customer, model " + \
+                "where model.mno like '%" + input_mno[0] + "%" + \
+                input_mno[1] + "%" + \
+                input_mno[2] + "%' " + \
+                "and customer.cid = model.cid"
     cursor.execute(m_sql)
     conn.commit()
     rows = cursor.fetchall()
@@ -271,7 +285,7 @@ def select_model_cname() :
     line = line.strip()
     column_values = line.split()
     input_cname = column_values[0]
-    if len(input_cname) == 1 or len(input_cname) == 3:
+    if len(input_cname) == 1: # cname은 가변길이. 근데 이름이 '손고장난벽시'라면?
         m_sql = "select customer.cname, customer.cid, bid, model.mno, model.type, model.rentaldate " + \
                 "from customer, model " + \
                 "where customer.cname like '%" + input_cname + "%' " + \
@@ -279,8 +293,32 @@ def select_model_cname() :
     elif len(input_cname) == 2:
         m_sql = "select customer.cname, customer.cid, bid, model.mno, model.type, model.rentaldate " + \
                 "from customer, model " + \
-                "where customer.cname like '%" + input_cname[0] + "%' " + \
-                "and customer.cname like '%" + input_cname[1] + "%' " + \
+                "where customer.cname like '%" + input_cname[0] + "%" + \
+                input_cname[1] + "%' " + \
+                "and customer.cid = model.cid"
+    elif len(input_cname) == 3:
+        m_sql = "select customer.cname, customer.cid, bid, model.mno, model.type, model.rentaldate " + \
+                "from customer, model " + \
+                "where customer.cname like '%" + input_cname[0] + "%" + \
+                input_cname[1] + "%" + \
+                input_cname[2] + "%' " + \
+                "and customer.cid = model.cid"
+    elif len(input_cname) == 4:
+        m_sql = "select customer.cname, customer.cid, bid, model.mno, model.type, model.rentaldate " + \
+                "from customer, model " + \
+                "where customer.cname like '%" + input_cname[0] + "%" + \
+                input_cname[1] + "%" + \
+                input_cname[2] + "%" + \
+                input_cname[3] + "%' " + \
+                "and customer.cid = model.cid"
+    elif len(input_cname) == 5:
+        m_sql = "select customer.cname, customer.cid, bid, model.mno, model.type, model.rentaldate " + \
+                "from customer, model " + \
+                "where customer.cname like '%" + input_cname[0] + "%" + \
+                input_cname[1] + "%" + \
+                input_cname[2] + "%" + \
+                input_cname[3] + "%" + \
+                input_cname[4] + "%' " + \
                 "and customer.cid = model.cid"
     cursor.execute(m_sql)
     conn.commit()
