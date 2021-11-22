@@ -1,4 +1,5 @@
 import pymysql
+
 conn = pymysql.connect(host='localhost', user='root',
                        password='2020121t', db='appliance_rental', charset='utf8mb4')
 cursor = conn.cursor()
@@ -15,7 +16,6 @@ cursor.execute("set foreign_key_checks = 1")
 cursor.execute("set foreign_key_checks = 0")
 cursor.execute("drop table IF EXISTS model cascade")
 cursor.execute("set foreign_key_checks = 1")
-
 
 # 테이블 생성
 sql = """create table customer(
@@ -47,7 +47,8 @@ sql = """create table model(
     """
 cursor.execute(sql)
 
-def join() :
+
+def join():
     line = r_file.readline()
     line = line.strip()
     column_values = line.split()
@@ -67,10 +68,11 @@ def join() :
     w_file.write("> " + CID + ' ' + cname + ' ' + contact + "\n")
 
 
-def exit() :
+def exit():
     w_file.write("1.2. 종료\n")
 
-def customer_login() :
+
+def customer_login():
     line = r_file.readline()
     line = line.strip()
     column_values = line.split()
@@ -80,7 +82,8 @@ def customer_login() :
     w_file.write("> " + CID + "\n")
     return CID
 
-def customer_insert_model(cur_cid) :
+
+def customer_insert_model(cur_cid):
     line = r_file.readline()
     line = line.strip()
     column_values = line.split()
@@ -117,9 +120,9 @@ def customer_insert_model(cur_cid) :
     w_file.write("> " + BID + " " + mno + " " + type + " " + rentaldate + "\n")
 
 
-def customer_select(cur_cid) :
+def customer_select(cur_cid):
     w_file.write("2.3. 제품 렌탈 예약 조회\n")
-    sql = "select * from model where cid = '" + cur_cid + "' "
+    sql = "select * from model where cid = '" + cur_cid + "' and rentaldate is not null "
     cursor.execute(sql)
     conn.commit()
     print("2 3")
@@ -132,8 +135,9 @@ def customer_select(cur_cid) :
         print(bid, mno, cur_cid, type, rental)
         w_file.write("> " + bid + " " + mno + " " + type + " " + str(rental) + "\n")
 
+
 # 예약 취소를 하면 고객 id도 삭제할 것인가?
-def customer_cancel(cur_cid) :
+def customer_cancel(cur_cid):
     w_file.write("2.4. 제품 렌탈 예약 취소\n")
     line = r_file.readline()
     line = line.strip()
@@ -141,6 +145,15 @@ def customer_cancel(cur_cid) :
 
     BID = column_values[0]
     mno = column_values[1]
+
+    date_sql = "select rentaldate from model " + \
+          " where bid = '" + BID + "' and mno = '" + mno + "' and cid = '" + cur_cid + "' "
+    cursor.execute(date_sql)
+    conn.commit()
+    rtdate = ' '
+    li = cursor.fetchall()
+    for record in li:
+        rtdate = record[0]
 
     sql = "update model set rentaldate = null " + \
           " where bid = '" + BID + "' and mno = '" + mno + "' and cid = '" + cur_cid + "' "
@@ -158,14 +171,15 @@ def customer_cancel(cur_cid) :
         type = record[3]
         rental = record[4]
         print(bid, mno, cur_cid, type, rental)
-        w_file.write("> " + bid + " " + mno + " " + type + " " + str(rental) + "\n")
+        w_file.write("> " + bid + " " + mno + " " + type + " " + str(rtdate) + "\n")
 
 
 def customer_logout(cid):
     w_file.write("2.5. 로그아웃\n")
     w_file.write("> " + cid + "\n")
 
-def admin_login() :
+
+def admin_login():
     line = r_file.readline()
     line = line.strip()
     column_values = line.split()
@@ -173,7 +187,8 @@ def admin_login() :
     w_file.write("3.1. 로그인\n")
     w_file.write("> " + CID + "\n")
 
-def insert_branch() :
+
+def insert_branch():
     line = r_file.readline()
     line = line.strip()
     column_values = line.split()
@@ -181,7 +196,7 @@ def insert_branch() :
     bname = column_values[1]
     baddr = column_values[2]
     b_sql = "insert into branch values('" \
-                   + BID + "', '" + bname + "', '" + baddr + "')"
+            + BID + "', '" + bname + "', '" + baddr + "')"
     cursor.execute(b_sql)
     conn.commit()
     cursor.execute("select * from branch")
@@ -196,8 +211,7 @@ def insert_branch() :
     w_file.write("> " + BID + ' ' + bname + ' ' + baddr + "\n")
 
 
-
-def insert_model() :
+def insert_model():
     line = r_file.readline()
     line = line.strip()
     column_values = line.split()
@@ -205,7 +219,7 @@ def insert_model() :
     mno = column_values[1]
     type = column_values[2]
     m_sql = "insert into model values('" \
-            + BID + "', '" + mno + "', " + 'null' + ", '" + type +  "', " +'null' + ")"
+            + BID + "', '" + mno + "', " + 'null' + ", '" + type + "', " + 'null' + ")"
     cursor.execute(m_sql)
     conn.commit()
 
@@ -216,15 +230,16 @@ def insert_model() :
         mmno = record[1]
         cid = record[2]
         mtype = record[3]
-        print(bid,mmno,cid,mtype)
+        print(bid, mmno, cid, mtype)
 
     w_file.write("3.3. 제품 정보 등록\n")
     w_file.write("> " + BID + ' ' + mno + ' ' + type + "\n")
 
-def select_model_all() :
+
+def select_model_all():
     m_sql = """select customer.cname, customer.cid, model.bid, model.mno, model.type, model.rentaldate 
             from customer, model
-            where customer.cid = model.cid"""
+            where customer.cid = model.cid and rentaldate is not null"""
 
     cursor.execute(m_sql)
     conn.commit()
@@ -241,29 +256,30 @@ def select_model_all() :
         w_file.write("> " + cname + ' ' + cid + ' ' + bid + ' ' + mno + ' ' +
                      type + ' ' + str(rentaldate) + "\n")
 
-def select_model_mno() :
+
+def select_model_mno():
     w_file.write("3.5. 렌탈 예약 내역 조회 (모델번호)\n")
     line = r_file.readline()
     line = line.strip()
     column_values = line.split()
     input_mno = column_values[0]
-    if len(input_mno) == 1 or len(input_mno) == 4: # mno는 고정길이 4
+    if len(input_mno) == 1 or len(input_mno) == 4:  # mno는 고정길이 4
         m_sql = "select customer.cname, customer.cid, bid, model.mno, model.type, model.rentaldate " + \
                 "from customer, model " + \
-                "where model.mno like '%" + input_mno + "%' " + \
+                "where model.mno like '%" + input_mno + "%' and rentaldate is not null" + \
                 "and customer.cid = model.cid"
     elif len(input_mno) == 2:
         m_sql = "select customer.cname, customer.cid, bid, model.mno, model.type, model.rentaldate " + \
                 "from customer, model " + \
                 "where model.mno like '%" + input_mno[0] + "%" + \
-                "" + input_mno[1] + "%' " + \
+                "" + input_mno[1] + "%' and rentaldate is not null " + \
                 "and customer.cid = model.cid"
     elif len(input_mno) == 3:
         m_sql = "select customer.cname, customer.cid, bid, model.mno, model.type, model.rentaldate " + \
                 "from customer, model " + \
                 "where model.mno like '%" + input_mno[0] + "%" + \
                 input_mno[1] + "%" + \
-                input_mno[2] + "%' " + \
+                input_mno[2] + "%' and rentaldate is not null " + \
                 "and customer.cid = model.cid"
     cursor.execute(m_sql)
     conn.commit()
@@ -279,29 +295,29 @@ def select_model_mno() :
                      type + ' ' + str(rentaldate) + "\n")
 
 
-def select_model_cname() :
+def select_model_cname():
     w_file.write("3.6. 예약 내역 조회 (고객 이름)\n")
     line = r_file.readline()
     line = line.strip()
     column_values = line.split()
     input_cname = column_values[0]
-    if len(input_cname) == 1: # cname은 가변길이. 근데 이름이 '손고장난벽시'라면?
+    if len(input_cname) == 1:  # cname은 가변길이. 근데 이름이 '손고장난벽시'라면?
         m_sql = "select customer.cname, customer.cid, bid, model.mno, model.type, model.rentaldate " + \
                 "from customer, model " + \
-                "where customer.cname like '%" + input_cname + "%' " + \
+                "where customer.cname like '%" + input_cname + "%' and rentaldate is not null " + \
                 "and customer.cid = model.cid"
     elif len(input_cname) == 2:
         m_sql = "select customer.cname, customer.cid, bid, model.mno, model.type, model.rentaldate " + \
                 "from customer, model " + \
                 "where customer.cname like '%" + input_cname[0] + "%" + \
-                input_cname[1] + "%' " + \
+                input_cname[1] + "%' and rentaldate is not null " + \
                 "and customer.cid = model.cid"
     elif len(input_cname) == 3:
         m_sql = "select customer.cname, customer.cid, bid, model.mno, model.type, model.rentaldate " + \
                 "from customer, model " + \
                 "where customer.cname like '%" + input_cname[0] + "%" + \
                 input_cname[1] + "%" + \
-                input_cname[2] + "%' " + \
+                input_cname[2] + "%' and rentaldate is not null " + \
                 "and customer.cid = model.cid"
     elif len(input_cname) == 4:
         m_sql = "select customer.cname, customer.cid, bid, model.mno, model.type, model.rentaldate " + \
@@ -309,7 +325,7 @@ def select_model_cname() :
                 "where customer.cname like '%" + input_cname[0] + "%" + \
                 input_cname[1] + "%" + \
                 input_cname[2] + "%" + \
-                input_cname[3] + "%' " + \
+                input_cname[3] + "%' and rentaldate is not null " + \
                 "and customer.cid = model.cid"
     elif len(input_cname) == 5:
         m_sql = "select customer.cname, customer.cid, bid, model.mno, model.type, model.rentaldate " + \
@@ -318,7 +334,7 @@ def select_model_cname() :
                 input_cname[1] + "%" + \
                 input_cname[2] + "%" + \
                 input_cname[3] + "%" + \
-                input_cname[4] + "%' " + \
+                input_cname[4] + "%' and rentaldate is not null " + \
                 "and customer.cid = model.cid"
     cursor.execute(m_sql)
     conn.commit()
@@ -333,14 +349,15 @@ def select_model_cname() :
         w_file.write("> " + cname + ' ' + cid + ' ' + bid + ' ' + mno + ' ' +
                      type + ' ' + str(rentaldate) + "\n")
 
-def admin_logout() :
+
+def admin_logout():
     w_file.write("3.7. 로그아웃\n")
     w_file.write("> admin\n")
 
 
-def doTask() :
+def doTask():
     # 종료 메뉴(1 2)가 입력되기 전까지 반복함
-    while True :
+    while True:
         # 입력파일에서 메뉴 숫자 2개 읽기
         line = r_file.readline()
         line = line.strip()
@@ -384,6 +401,7 @@ def doTask() :
                 select_model_cname()
             else:
                 admin_logout()
+
 
 cur_cid = ' '
 
