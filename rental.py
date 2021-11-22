@@ -105,7 +105,6 @@ def customer_insert_model(cur_cid):
 
         cursor.execute(b_sql)
         conn.commit()
-    print("2 2")
     cursor.execute("select * from model")
     li = cursor.fetchall()
     for record in li:
@@ -114,7 +113,6 @@ def customer_insert_model(cur_cid):
         cid = record[2]
         mtype = record[3]
         rental = record[4]
-        print(bid, mmno, cid, mtype, rental)
 
     w_file.write("2.2. 제품 렌탈 예약\n")
     w_file.write("> " + BID + " " + mno + " " + type + " " + rentaldate + "\n")
@@ -125,14 +123,12 @@ def customer_select(cur_cid):
     sql = "select * from model where cid = '" + cur_cid + "' and rentaldate is not null "
     cursor.execute(sql)
     conn.commit()
-    print("2 3")
     li = cursor.fetchall()
     for record in li:
         bid = record[0]
         mno = record[1]
         type = record[3]
         rental = record[4]
-        print(bid, mno, cur_cid, type, rental)
         w_file.write("> " + bid + " " + mno + " " + type + " " + str(rental) + "\n")
 
 
@@ -160,7 +156,6 @@ def customer_cancel(cur_cid):
 
     cursor.execute(sql)
     conn.commit()
-    print("2 4")
     cursor.execute("select * from model "
                    "where bid = '" + BID + "' and mno = '" + mno + "' and cid = '" + cur_cid + "' ")
     li = cursor.fetchall()
@@ -170,7 +165,6 @@ def customer_cancel(cur_cid):
         cid = record[2]
         type = record[3]
         rental = record[4]
-        print(bid, mno, cur_cid, type, rental)
         w_file.write("> " + bid + " " + mno + " " + type + " " + str(rtdate) + "\n")
 
 
@@ -205,7 +199,6 @@ def insert_branch():
         bid = record[0]
         bname = record[1]
         baddr = record[2]
-        print(bid, bname, baddr)
 
     w_file.write("3.2. 대리점 정보 등록\n")
     w_file.write("> " + BID + ' ' + bname + ' ' + baddr + "\n")
@@ -230,7 +223,6 @@ def insert_model():
         mmno = record[1]
         cid = record[2]
         mtype = record[3]
-        print(bid, mmno, cid, mtype)
 
     w_file.write("3.3. 제품 정보 등록\n")
     w_file.write("> " + BID + ' ' + mno + ' ' + type + "\n")
