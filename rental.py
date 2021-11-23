@@ -46,6 +46,7 @@ sql = """create table model(
     )
     """
 cursor.execute(sql)
+invalid_cid = ' ' # 무효처리할 고객 아이디
 
 
 def join():
@@ -55,6 +56,10 @@ def join():
     CID = column_values[0]
     cname = column_values[1]
     contact = column_values[2]
+
+    global invalid_cid
+    if invalid_cid == CID : # 무효처리된 고객 아이디가 회원가입 되었다면 무효처리를 해제
+        invalid_cid = ' '
 
     customer_sql = "insert into customer values('" \
                    + CID + "', '" + cname + "', '" + contact + "')"
@@ -77,9 +82,24 @@ def customer_login():
     line = line.strip()
     column_values = line.split()
 
-    CID = column_values[0]
-    w_file.write("2.1. 로그인\n")
-    w_file.write("> " + CID + "\n")
+    CID = column_values[0] # 로그인 Input으로 들어오는 CID
+    sql = "select * from customer where cid = '" + CID + "' "
+    cursor.execute(sql)
+    conn.commit()
+    rows = cursor.fetchall()
+
+    ''' 로그인 한 고객의 아이디가 회원가입 되어있지 않을 때 '''
+    if len(rows) == 0:
+        w_file.write("2.1. 로그인 할 수 없는 미가입된 아이디: " + CID + "\n")
+        global invalid_cid
+        global cur_cid
+        invalid_cid = CID
+
+    else :
+        w_file.write("2.1. 로그인\n")
+        w_file.write("> " + CID + "\n")
+
+    cur_cid = CID
     return CID
 
 
@@ -91,6 +111,10 @@ def customer_insert_model(cur_cid):
     BID = column_values[0]
     mno = column_values[1]
     rentaldate = column_values[2]
+
+    if cur_cid == invalid_cid :
+        w_file.write("2.2. 제품 렌탈 예약: " + invalid_cid + "은 불가능합니다.\n")
+        return
 
     sql = "select type from model where mno =" + "'" + mno + "'"
     cursor.execute(sql)
@@ -119,6 +143,11 @@ def customer_insert_model(cur_cid):
 
 
 def customer_select(cur_cid):
+
+    if cur_cid == invalid_cid :
+        w_file.write("2.3. 제품 렌탈 예약 조회: " + invalid_cid + "은 불가능합니다.\n")
+        return
+
     w_file.write("2.3. 제품 렌탈 예약 조회\n")
     sql = "select * from model where cid = '" + cur_cid + "' and rentaldate is not null "
     cursor.execute(sql)
@@ -134,7 +163,7 @@ def customer_select(cur_cid):
 
 # 예약 취소를 하면 고객 id도 삭제할 것인가?
 def customer_cancel(cur_cid):
-    w_file.write("2.4. 제품 렌탈 예약 취소\n")
+
     line = r_file.readline()
     line = line.strip()
     column_values = line.split()
@@ -142,6 +171,10 @@ def customer_cancel(cur_cid):
     BID = column_values[0]
     mno = column_values[1]
 
+    if cur_cid == invalid_cid :
+        w_file.write("2.4. 제품 렌탈 예약 취소: " + invalid_cid + "은 불가능합니다.\n")
+        return
+    w_file.write("2.4. 제품 렌탈 예약 취소\n")
     date_sql = "select rentaldate from model " + \
           " where bid = '" + BID + "' and mno = '" + mno + "' and cid = '" + cur_cid + "' "
     cursor.execute(date_sql)
