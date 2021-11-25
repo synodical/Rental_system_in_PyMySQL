@@ -161,7 +161,6 @@ def customer_select(cur_cid):
         w_file.write("> " + bid + " " + mno + " " + type + " " + str(rental) + "\n")
 
 
-# 예약 취소를 하면 고객 id도 삭제할 것인가?
 def customer_cancel(cur_cid):
 
     line = r_file.readline()
@@ -250,12 +249,6 @@ def insert_model():
     conn.commit()
 
     cursor.execute("select * from model")
-    li = cursor.fetchall()
-    for record in li:
-        bid = record[0]
-        mmno = record[1]
-        cid = record[2]
-        mtype = record[3]
 
     w_file.write("3.3. 제품 정보 등록\n")
     w_file.write("> " + BID + ' ' + mno + ' ' + type + "\n")
@@ -326,7 +319,7 @@ def select_model_cname():
     line = line.strip()
     column_values = line.split()
     input_cname = column_values[0]
-    if len(input_cname) == 1:  # cname은 가변길이. 근데 이름이 '손고장난벽시'라면?
+    if len(input_cname) == 1:
         m_sql = "select customer.cname, customer.cid, bid, model.mno, model.type, model.rentaldate " + \
                 "from customer, model " + \
                 "where customer.cname like '%" + input_cname + "%' and rentaldate is not null " + \
